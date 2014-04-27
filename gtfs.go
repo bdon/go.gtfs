@@ -11,6 +11,7 @@ import (
 type Feed struct {
 	Dir    string
 	Routes map[string]Route
+	Shapes map[string]*Shape
 }
 
 type Route struct {
@@ -20,10 +21,18 @@ type Route struct {
 }
 
 type Trip struct {
-	Id string
+	Id    string
+	Shape *Shape
 }
 
 type Shape struct {
+	Id     string
+	Coords []Coord
+}
+
+type Coord struct {
+	Lat float64
+	Lon float64
 }
 
 // main utility function for reading GTFS files
@@ -54,6 +63,25 @@ func (feed *Feed) readCsv(filename string, f func([]string)) {
 func Load(feed_path string) Feed {
 	f := Feed{Dir: feed_path}
 	f.Routes = make(map[string]Route)
+	f.Shapes = make(map[string]*Shape)
+
+	// we assume that this CSV is ordered by shape_id
+	// but this is not guaranteed in spec?
+	var curShape *Shape
+	var found = false
+	f.readCsv("shapes.txt", func(s []string) {
+		shape_id := s[0]
+		if !found || shape_id != curShape.Id {
+			if found {
+				f.Shapes[curShape.Id] = curShape
+			}
+			found = true
+			curShape = &Shape{Id: shape_id}
+		}
+	})
+	if found {
+		f.Shapes[curShape.Id] = curShape
+	}
 
 	f.readCsv("routes.txt", func(s []string) {
 		rsn := strings.TrimSpace(s[2])
@@ -63,8 +91,11 @@ func Load(feed_path string) Feed {
 
 	f.readCsv("trips.txt", func(s []string) {
 		route_id := s[0]
+		shape_id := s[6]
 		route := f.Routes[route_id]
-		route.Trips = append(route.Trips, Trip{Id: "5"})
+		var shape *Shape
+		shape = f.Shapes[shape_id]
+		route.Trips = append(route.Trips, Trip{Shape: shape})
 		f.Routes[route_id] = route
 	})
 
@@ -82,7 +113,17 @@ func (feed *Feed) RouteByShortName(shortName string) Route {
 }
 
 // get All shapes for a route
-//
-func (route *Route) Shapes() []Shape {
-	return []Shape{}
+func (route Route) Shapes() []*Shape {
+	// collect the unique list of shape pointers
+	hsh := make(map[*Shape]bool)
+
+	for _, v := range route.Trips {
+		hsh[v.Shape] = true
+	}
+
+	retval := []*Shape{}
+	for k, _ := range hsh {
+		retval = append(retval, k)
+	}
+	return retval
 }

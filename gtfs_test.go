@@ -37,5 +37,14 @@ func TestTrips(t *testing.T) {
 }
 
 func TestShapes(t *testing.T) {
+	feed := Load("./fixtures")
+	res := len(feed.Shapes)
+	if res != 3 {
+		t.Errorf("Feed should have three total shapes")
+	}
 
+	res = len(feed.RouteByShortName("N").Shapes())
+	if res != 2 {
+		t.Errorf("Route should have two total shapes")
+	}
 }
