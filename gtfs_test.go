@@ -1,13 +1,8 @@
 package gtfs
 
 import (
-	"fmt"
 	"testing"
 )
-
-func p(s interface{}) {
-	fmt.Println(s)
-}
 
 func TestLoadRoutes(t *testing.T) {
 	feed := Load("./fixtures")

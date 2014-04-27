@@ -48,7 +48,6 @@ func (a BySeq) Less(i, j int) bool { return a[i].Seq < a[j].Seq }
 func (feed *Feed) readCsv(filename string, f func([]string)) {
 	file, err := os.Open(path.Join(feed.Dir, filename))
 	if err != nil {
-		p(err)
 	}
 	defer file.Close()
 	reader := csv.NewReader(file)
