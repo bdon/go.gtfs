@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 	"path"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -33,7 +35,14 @@ type Shape struct {
 type Coord struct {
 	Lat float64
 	Lon float64
+	Seq int
 }
+
+type BySeq []Coord
+
+func (a BySeq) Len() int           { return len(a) }
+func (a BySeq) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a BySeq) Less(i, j int) bool { return a[i].Seq < a[j].Seq }
 
 // main utility function for reading GTFS files
 func (feed *Feed) readCsv(filename string, f func([]string)) {
@@ -65,7 +74,7 @@ func Load(feed_path string) Feed {
 	f.Routes = make(map[string]Route)
 	f.Shapes = make(map[string]*Shape)
 
-	// we assume that this CSV is ordered by shape_id
+	// we assume that this CSV is grouped by shape_id
 	// but this is not guaranteed in spec?
 	var curShape *Shape
 	var found = false
@@ -78,9 +87,18 @@ func Load(feed_path string) Feed {
 			found = true
 			curShape = &Shape{Id: shape_id}
 		}
+		lon, _ := strconv.ParseFloat(s[1], 64)
+		lat, _ := strconv.ParseFloat(s[2], 64)
+		seq, _ := strconv.Atoi(s[3])
+		curShape.Coords = append(curShape.Coords, Coord{Lat: lat, Lon: lon, Seq: seq})
 	})
 	if found {
 		f.Shapes[curShape.Id] = curShape
+	}
+
+	// sort coords by their sequence
+	for _, v := range f.Shapes {
+		sort.Sort(BySeq(v.Coords))
 	}
 
 	f.readCsv("routes.txt", func(s []string) {

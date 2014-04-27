@@ -47,4 +47,9 @@ func TestShapes(t *testing.T) {
 	if res != 2 {
 		t.Errorf("Route should have two total shapes")
 	}
+
+	coord := feed.Shapes["116466"].Coords[0]
+	if !(coord.Lat == 37.760036 && coord.Lon == -122.509075) {
+		t.Errorf("Failed to parse shape coordinates.")
+	}
 }
