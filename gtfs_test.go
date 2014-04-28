@@ -48,3 +48,21 @@ func TestShapes(t *testing.T) {
 		t.Errorf("Failed to parse shape coordinates.")
 	}
 }
+
+func TestTimeParsing(t *testing.T) {
+	res := Hmstoi("00:00:00")
+	expected := 0
+	if res != expected {
+		t.Errorf("Expected %d, got %d", expected, res)
+	}
+	res = Hmstoi("23:59:59")
+	expected = 86399
+	if res != expected {
+		t.Errorf("Expected %d, got %d", expected, res)
+	}
+	res = Hmstoi("12:34:56")
+	expected = 45296
+	if res != expected {
+		t.Errorf("Expected %d, got %d", expected, res)
+	}
+}

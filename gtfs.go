@@ -144,3 +144,12 @@ func (route Route) Shapes() []*Shape {
 	}
 	return retval
 }
+
+func Hmstoi(str string) int {
+	components := strings.Split(str, ":")
+	hour, _ := strconv.Atoi(components[0])
+	min, _ := strconv.Atoi(components[1])
+	sec, _ := strconv.Atoi(components[2])
+	retval := hour*60*60 + min*60 + sec
+	return retval
+}
