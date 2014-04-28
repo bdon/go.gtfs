@@ -1,0 +1,5 @@
+stop_id,stop_name,stop_desc,stop_lat,stop_lon,zone_id,stop_url
+5220,Judah St & Funston Ave  , ,37.76195,-122.470572, , 
+5221,Judah/La Playa/Ocean Beach  , ,37.760363,-122.509011, , 
+5223,Judah/La Playa/Ocean Beach, ,37.76017,-122.508777, , 
+5224,Judah St & Sunset Blvd  , ,37.760912,-122.495565, , 

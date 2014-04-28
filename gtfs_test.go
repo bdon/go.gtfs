@@ -66,3 +66,11 @@ func TestTimeParsing(t *testing.T) {
 		t.Errorf("Expected %d, got %d", expected, res)
 	}
 }
+
+func TestStops(t *testing.T) {
+	feed := Load("./fixtures")
+	res := len(feed.Stops)
+	if res != 4 {
+		t.Errorf("Feed should have four total stops")
+	}
+}

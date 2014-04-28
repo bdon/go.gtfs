@@ -14,6 +14,7 @@ type Feed struct {
 	Dir    string
 	Routes map[string]Route
 	Shapes map[string]*Shape
+	Stops  map[string]Stop
 }
 
 type Route struct {
@@ -30,6 +31,12 @@ type Trip struct {
 type Shape struct {
 	Id     string
 	Coords []Coord
+}
+
+type Stop struct {
+	Id    string
+	Name  string
+	Coord Coord
 }
 
 type Coord struct {
@@ -72,6 +79,7 @@ func Load(feed_path string) Feed {
 	f := Feed{Dir: feed_path}
 	f.Routes = make(map[string]Route)
 	f.Shapes = make(map[string]*Shape)
+	f.Stops = make(map[string]Stop)
 
 	// we assume that this CSV is grouped by shape_id
 	// but this is not guaranteed in spec?
@@ -114,6 +122,15 @@ func Load(feed_path string) Feed {
 		shape = f.Shapes[shape_id]
 		route.Trips = append(route.Trips, Trip{Shape: shape})
 		f.Routes[route_id] = route
+	})
+
+	f.readCsv("stops.txt", func(s []string) {
+		stop_id := s[0]
+		stop_name := s[1]
+		stop_lat, _ := strconv.ParseFloat(s[3], 64)
+		stop_lon, _ := strconv.ParseFloat(s[4], 64)
+		coord := Coord{Lat: stop_lat, Lon: stop_lon}
+		f.Stops[stop_id] = Stop{Coord: coord, Name: stop_name, Id: stop_id}
 	})
 
 	return f
