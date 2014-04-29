@@ -25,9 +25,23 @@ func TestLoadRoutes(t *testing.T) {
 func TestTrips(t *testing.T) {
 	feed := Load("./fixtures")
 
-	res := len(feed.RouteByShortName("N").Trips)
+	res := len(feed.Trips)
+	if res != 24 {
+		t.Errorf("Feed should have 24 trips")
+	}
+
+	res = len(feed.RouteByShortName("N").Trips)
 	if res != 23 {
 		t.Errorf("Route should have all trips, got %d", res)
+	}
+}
+
+func TestStopTimes(t *testing.T) {
+	feed := Load("./fixtures")
+	trip := feed.RouteByShortName("N").Trips[0]
+	res := len(trip.StopTimes())
+	if res != 2 {
+		t.Errorf("Trip should have two stop times.")
 	}
 }
 
@@ -47,6 +61,19 @@ func TestShapes(t *testing.T) {
 	if !(coord.Lat == 37.760036 && coord.Lon == -122.509075) {
 		t.Errorf("Failed to parse shape coordinates.")
 	}
+}
+
+func TestLongestShape(t *testing.T) {
+	// this is kind of a hack.
+	// But for convenience, determine the longest shape of a Route.
+	// By # of stops perhaps? ensure that it is a superset of other trips?
+}
+
+func TestShapeStops(t *testing.T) {
+	// GTFS does not have a direct relationship between Shapes and Stops
+	// we can go up to a Trip with this Shape and find all its stops
+	// makes the assumption that all Trips with this Shape have the same Stops
+
 }
 
 func TestTimeParsing(t *testing.T) {

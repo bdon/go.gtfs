@@ -12,20 +12,23 @@ import (
 
 type Feed struct {
 	Dir    string
-	Routes map[string]Route
+	Routes map[string]*Route
 	Shapes map[string]*Shape
-	Stops  map[string]Stop
+	Stops  map[string]*Stop
+	Trips  map[string]*Trip
 }
 
 type Route struct {
 	Id        string
 	ShortName string
-	Trips     []Trip
+	Trips     []*Trip
+	Feed      *Feed
 }
 
 type Trip struct {
 	Id    string
 	Shape *Shape
+	Route *Route
 }
 
 type Shape struct {
@@ -37,6 +40,13 @@ type Stop struct {
 	Id    string
 	Name  string
 	Coord Coord
+}
+
+type StopTime struct {
+	Stop *Stop
+	Trip *Trip
+	Time int
+	Seq  int
 }
 
 type Coord struct {
@@ -77,9 +87,10 @@ func (feed *Feed) readCsv(filename string, f func([]string)) {
 
 func Load(feed_path string) Feed {
 	f := Feed{Dir: feed_path}
-	f.Routes = make(map[string]Route)
+	f.Routes = make(map[string]*Route)
 	f.Shapes = make(map[string]*Shape)
-	f.Stops = make(map[string]Stop)
+	f.Stops = make(map[string]*Stop)
+	f.Trips = make(map[string]*Trip)
 
 	// we assume that this CSV is grouped by shape_id
 	// but this is not guaranteed in spec?
@@ -111,16 +122,22 @@ func Load(feed_path string) Feed {
 	f.readCsv("routes.txt", func(s []string) {
 		rsn := strings.TrimSpace(s[2])
 		id := strings.TrimSpace(s[0])
-		f.Routes[id] = Route{Id: id, ShortName: rsn}
+		f.Routes[id] = &Route{Id: id, ShortName: rsn, Feed: &f}
 	})
 
 	f.readCsv("trips.txt", func(s []string) {
+		trip_id := s[2]
 		route_id := s[0]
 		shape_id := s[6]
-		route := f.Routes[route_id]
+
 		var shape *Shape
 		shape = f.Shapes[shape_id]
-		route.Trips = append(route.Trips, Trip{Shape: shape})
+		var trip Trip
+		f.Trips[trip_id] = &trip
+
+		route := f.Routes[route_id]
+		trip = Trip{Shape: shape, Route: route}
+		route.Trips = append(route.Trips, &trip)
 		f.Routes[route_id] = route
 	})
 
@@ -130,20 +147,20 @@ func Load(feed_path string) Feed {
 		stop_lat, _ := strconv.ParseFloat(s[3], 64)
 		stop_lon, _ := strconv.ParseFloat(s[4], 64)
 		coord := Coord{Lat: stop_lat, Lon: stop_lon}
-		f.Stops[stop_id] = Stop{Coord: coord, Name: stop_name, Id: stop_id}
+		f.Stops[stop_id] = &Stop{Coord: coord, Name: stop_name, Id: stop_id}
 	})
 
 	return f
 }
 
-func (feed *Feed) RouteByShortName(shortName string) Route {
+func (feed *Feed) RouteByShortName(shortName string) *Route {
 	for _, v := range feed.Routes {
 		if v.ShortName == shortName {
 			return v
 		}
 	}
 	//TODO error here
-	return Route{}
+	return &Route{}
 }
 
 // get All shapes for a route
@@ -168,5 +185,21 @@ func Hmstoi(str string) int {
 	min, _ := strconv.Atoi(components[1])
 	sec, _ := strconv.Atoi(components[2])
 	retval := hour*60*60 + min*60 + sec
+	return retval
+}
+
+func (trip Trip) StopTimes() []StopTime {
+	retval := []StopTime{}
+	feed := trip.Route.Feed
+
+	feed.readCsv("stop_times.txt", func(s []string) {
+		trip_id := s[0]
+		stop_id := s[3]
+		seq, _ := strconv.Atoi(s[4])
+		trip := feed.Trips[trip_id]
+		stop := feed.Stops[stop_id]
+		retval = append(retval, StopTime{Trip: trip, Stop: stop, Seq: seq})
+	})
+
 	return retval
 }
