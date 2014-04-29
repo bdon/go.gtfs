@@ -49,17 +49,23 @@ type StopTime struct {
 	Seq  int
 }
 
+type StopTimeBySeq []StopTime
+
+func (a StopTimeBySeq) Len() int           { return len(a) }
+func (a StopTimeBySeq) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a StopTimeBySeq) Less(i, j int) bool { return a[i].Seq < a[j].Seq }
+
 type Coord struct {
 	Lat float64
 	Lon float64
 	Seq int
 }
 
-type BySeq []Coord
+type CoordBySeq []Coord
 
-func (a BySeq) Len() int           { return len(a) }
-func (a BySeq) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a BySeq) Less(i, j int) bool { return a[i].Seq < a[j].Seq }
+func (a CoordBySeq) Len() int           { return len(a) }
+func (a CoordBySeq) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a CoordBySeq) Less(i, j int) bool { return a[i].Seq < a[j].Seq }
 
 // main utility function for reading GTFS files
 func (feed *Feed) readCsv(filename string, f func([]string)) {
@@ -116,7 +122,7 @@ func Load(feed_path string) Feed {
 
 	// sort coords by their sequence
 	for _, v := range f.Shapes {
-		sort.Sort(BySeq(v.Coords))
+		sort.Sort(CoordBySeq(v.Coords))
 	}
 
 	f.readCsv("routes.txt", func(s []string) {
@@ -136,7 +142,7 @@ func Load(feed_path string) Feed {
 		f.Trips[trip_id] = &trip
 
 		route := f.Routes[route_id]
-		trip = Trip{Shape: shape, Route: route}
+		trip = Trip{Shape: shape, Route: route, Id: trip_id}
 		route.Trips = append(route.Trips, &trip)
 		f.Routes[route_id] = route
 	})
@@ -194,12 +200,17 @@ func (trip Trip) StopTimes() []StopTime {
 
 	feed.readCsv("stop_times.txt", func(s []string) {
 		trip_id := s[0]
-		stop_id := s[3]
-		seq, _ := strconv.Atoi(s[4])
-		trip := feed.Trips[trip_id]
-		stop := feed.Stops[stop_id]
-		retval = append(retval, StopTime{Trip: trip, Stop: stop, Seq: seq})
+		if trip_id == trip.Id {
+			stop_id := s[3]
+			seq, _ := strconv.Atoi(s[4])
+			time := Hmstoi(s[1])
+			stop := feed.Stops[stop_id]
+			retval = append(retval, StopTime{Trip: &trip, Stop: stop, Seq: seq, Time: time})
+		}
 	})
+
+	// sort stops by seq
+	sort.Sort(StopTimeBySeq(retval))
 
 	return retval
 }

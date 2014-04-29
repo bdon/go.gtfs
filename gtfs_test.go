@@ -43,6 +43,18 @@ func TestStopTimes(t *testing.T) {
 	if res != 2 {
 		t.Errorf("Trip should have two stop times.")
 	}
+
+	stopTime1 := trip.StopTimes()[0]
+
+	res = stopTime1.Seq
+	if res != 1 {
+		t.Errorf("StopTime should have seq 1, got %d", res)
+	}
+
+	res = stopTime1.Time
+	if res != 25740 {
+		t.Errorf("Stop with sequence 1 should have time 25740, got %d", res)
+	}
 }
 
 func TestShapes(t *testing.T) {
