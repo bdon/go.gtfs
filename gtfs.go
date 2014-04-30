@@ -206,6 +206,33 @@ func Hmstoi(str string) int {
 	return retval
 }
 
+func (route Route) Stops() []*Stop {
+	trips := make(map[string]bool)
+	stops := make(map[*Stop]bool)
+	// can't assume the longest shape includes all stops
+
+	for _, t := range route.Trips {
+		trips[t.Id] = true
+	}
+
+	feed := route.Feed
+	feed.readCsv("stop_times.txt", func(s []string) {
+		trip_id := s[0]
+		_, ok := trips[trip_id]
+		if ok {
+			stop_id := s[3]
+			stop := feed.Stops[stop_id]
+			stops[stop] = true
+		}
+	})
+
+	retval := []*Stop{}
+	for k, _ := range stops {
+		retval = append(retval, k)
+	}
+	return retval
+}
+
 func (trip Trip) StopTimes() []StopTime {
 	retval := []StopTime{}
 	feed := trip.Route.Feed

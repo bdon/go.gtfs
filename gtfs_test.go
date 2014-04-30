@@ -87,12 +87,14 @@ func TestLongestShape(t *testing.T) {
 	}
 }
 
-func TestShapeStops(t *testing.T) {
-	// GTFS does not have a direct relationship between Shapes and Stops
-	// we can go up to a Trip with this Shape and find all its stops
-	// makes the assumption that all Trips with this Shape have the same Stops
-	// need to read stop times.
+func TestRouteStops(t *testing.T) {
+	// this won't work for forking routes
 
+	feed := Load("./fixtures")
+	res := len(feed.RouteByShortName("N").Stops())
+	if res != 2 {
+		t.Errorf("Route should have 2 total stops, got %d", res)
+	}
 }
 
 func TestTimeParsing(t *testing.T) {

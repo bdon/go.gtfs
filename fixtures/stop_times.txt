@@ -1,3 +1,5 @@
 trip_id,arrival_time,departure_time,stop_id,stop_sequence,stop_headsign,pickup_type,drop_off_type,shape_dist_traveled
 6041339,07:09:00,07:09:00,5220,1, , , , 
 6041339,07:11:00,07:11:00,5221,2, , , , 
+6041338,07:11:00,07:11:00,5221,2, , , , 
+9999999,07:11:00,07:11:00,999,2, , , , 
