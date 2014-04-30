@@ -79,12 +79,19 @@ func TestLongestShape(t *testing.T) {
 	// this is kind of a hack.
 	// But for convenience, determine the longest shape of a Route.
 	// By # of stops perhaps? ensure that it is a superset of other trips?
+
+	feed := Load("./fixtures")
+	res := feed.RouteByShortName("N").LongestShape()
+	if res.Id != "116466" {
+		t.Errorf("Longest shape should be 116466, got %s", res.Id)
+	}
 }
 
 func TestShapeStops(t *testing.T) {
 	// GTFS does not have a direct relationship between Shapes and Stops
 	// we can go up to a Trip with this Shape and find all its stops
 	// makes the assumption that all Trips with this Shape have the same Stops
+	// need to read stop times.
 
 }
 

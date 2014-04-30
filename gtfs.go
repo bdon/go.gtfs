@@ -185,6 +185,18 @@ func (route Route) Shapes() []*Shape {
 	return retval
 }
 
+func (route Route) LongestShape() *Shape {
+	max := 0
+	var shape *Shape
+	for _, s := range route.Shapes() {
+		if len(s.Coords) > max {
+			shape = s
+			max = len(s.Coords)
+		}
+	}
+	return shape
+}
+
 func Hmstoi(str string) int {
 	components := strings.Split(str, ":")
 	hour, _ := strconv.Atoi(components[0])
