@@ -22,13 +22,15 @@ type Route struct {
 	Id        string
 	ShortName string
 	Trips     []*Trip
-	Feed      *Feed
 }
 
 type Trip struct {
 	Id    string
 	Shape *Shape
 	Route *Route
+
+	// may not be loaded
+	StopTimes []StopTime
 }
 
 type Shape struct {
@@ -91,7 +93,7 @@ func (feed *Feed) readCsv(filename string, f func([]string)) {
 	}
 }
 
-func Load(feed_path string) Feed {
+func Load(feed_path string, loadStopTimes bool) Feed {
 	f := Feed{Dir: feed_path}
 	f.Routes = make(map[string]*Route)
 	f.Shapes = make(map[string]*Shape)
@@ -128,7 +130,7 @@ func Load(feed_path string) Feed {
 	f.readCsv("routes.txt", func(s []string) {
 		rsn := strings.TrimSpace(s[2])
 		id := strings.TrimSpace(s[0])
-		f.Routes[id] = &Route{Id: id, ShortName: rsn, Feed: &f}
+		f.Routes[id] = &Route{Id: id, ShortName: rsn}
 	})
 
 	f.readCsv("trips.txt", func(s []string) {
@@ -139,6 +141,7 @@ func Load(feed_path string) Feed {
 		var shape *Shape
 		shape = f.Shapes[shape_id]
 		var trip Trip
+		trip.StopTimes = []StopTime{}
 		f.Trips[trip_id] = &trip
 
 		route := f.Routes[route_id]
@@ -155,6 +158,26 @@ func Load(feed_path string) Feed {
 		coord := Coord{Lat: stop_lat, Lon: stop_lon}
 		f.Stops[stop_id] = &Stop{Coord: coord, Name: stop_name, Id: stop_id}
 	})
+
+	if !loadStopTimes {
+		return f
+	}
+	f.readCsv("stop_times.txt", func(s []string) {
+		trip_id := s[0]
+		stop_id := s[3]
+		seq, _ := strconv.Atoi(s[4])
+		time := Hmstoi(s[1])
+		stop := f.Stops[stop_id]
+		trip := f.Trips[trip_id]
+		newStopTime := StopTime{Trip: trip, Stop: stop, Seq: seq, Time: time}
+		trip.StopTimes = append(trip.StopTimes, newStopTime)
+	})
+
+	// sort stops by seq
+
+	for _, v := range f.Trips {
+		sort.Sort(StopTimeBySeq(v.StopTimes))
+	}
 
 	return f
 }
@@ -207,49 +230,18 @@ func Hmstoi(str string) int {
 }
 
 func (route Route) Stops() []*Stop {
-	trips := make(map[string]bool)
 	stops := make(map[*Stop]bool)
 	// can't assume the longest shape includes all stops
 
 	for _, t := range route.Trips {
-		trips[t.Id] = true
-	}
-
-	feed := route.Feed
-	feed.readCsv("stop_times.txt", func(s []string) {
-		trip_id := s[0]
-		_, ok := trips[trip_id]
-		if ok {
-			stop_id := s[3]
-			stop := feed.Stops[stop_id]
-			stops[stop] = true
+		for _, st := range t.StopTimes {
+			stops[st.Stop] = true
 		}
-	})
+	}
 
 	retval := []*Stop{}
 	for k, _ := range stops {
 		retval = append(retval, k)
 	}
-	return retval
-}
-
-func (trip Trip) StopTimes() []StopTime {
-	retval := []StopTime{}
-	feed := trip.Route.Feed
-
-	feed.readCsv("stop_times.txt", func(s []string) {
-		trip_id := s[0]
-		if trip_id == trip.Id {
-			stop_id := s[3]
-			seq, _ := strconv.Atoi(s[4])
-			time := Hmstoi(s[1])
-			stop := feed.Stops[stop_id]
-			retval = append(retval, StopTime{Trip: &trip, Stop: stop, Seq: seq, Time: time})
-		}
-	})
-
-	// sort stops by seq
-	sort.Sort(StopTimeBySeq(retval))
-
 	return retval
 }

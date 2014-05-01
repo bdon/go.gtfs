@@ -5,7 +5,7 @@ import (
 )
 
 func TestLoadRoutes(t *testing.T) {
-	feed := Load("./fixtures")
+	feed := Load("./fixtures", true)
 
 	if len(feed.Routes) < 1 {
 		t.Error("Feed should have at least one route")
@@ -23,7 +23,7 @@ func TestLoadRoutes(t *testing.T) {
 }
 
 func TestTrips(t *testing.T) {
-	feed := Load("./fixtures")
+	feed := Load("./fixtures", true)
 
 	res := len(feed.Trips)
 	if res != 24 {
@@ -37,14 +37,14 @@ func TestTrips(t *testing.T) {
 }
 
 func TestStopTimes(t *testing.T) {
-	feed := Load("./fixtures")
+	feed := Load("./fixtures", true)
 	trip := feed.RouteByShortName("N").Trips[0]
-	res := len(trip.StopTimes())
+	res := len(trip.StopTimes)
 	if res != 2 {
 		t.Errorf("Trip should have two stop times.")
 	}
 
-	stopTime1 := trip.StopTimes()[0]
+	stopTime1 := trip.StopTimes[0]
 
 	res = stopTime1.Seq
 	if res != 1 {
@@ -58,7 +58,7 @@ func TestStopTimes(t *testing.T) {
 }
 
 func TestShapes(t *testing.T) {
-	feed := Load("./fixtures")
+	feed := Load("./fixtures", true)
 	res := len(feed.Shapes)
 	if res != 3 {
 		t.Errorf("Feed should have three total shapes")
@@ -80,7 +80,7 @@ func TestLongestShape(t *testing.T) {
 	// But for convenience, determine the longest shape of a Route.
 	// By # of stops perhaps? ensure that it is a superset of other trips?
 
-	feed := Load("./fixtures")
+	feed := Load("./fixtures", true)
 	res := feed.RouteByShortName("N").LongestShape()
 	if res.Id != "116466" {
 		t.Errorf("Longest shape should be 116466, got %s", res.Id)
@@ -90,7 +90,7 @@ func TestLongestShape(t *testing.T) {
 func TestRouteStops(t *testing.T) {
 	// this won't work for forking routes
 
-	feed := Load("./fixtures")
+	feed := Load("./fixtures", true)
 	res := len(feed.RouteByShortName("N").Stops())
 	if res != 2 {
 		t.Errorf("Route should have 2 total stops, got %d", res)
@@ -116,7 +116,7 @@ func TestTimeParsing(t *testing.T) {
 }
 
 func TestStops(t *testing.T) {
-	feed := Load("./fixtures")
+	feed := Load("./fixtures", true)
 	res := len(feed.Stops)
 	if res != 4 {
 		t.Errorf("Feed should have four total stops")
