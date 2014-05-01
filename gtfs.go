@@ -25,9 +25,11 @@ type Route struct {
 }
 
 type Trip struct {
-	Id    string
-	Shape *Shape
-	Route *Route
+	Id        string
+	Shape     *Shape
+	Route     *Route
+	Service   string
+	Direction string
 
 	// may not be loaded
 	StopTimes []StopTime
@@ -134,8 +136,10 @@ func Load(feed_path string, loadStopTimes bool) Feed {
 	})
 
 	f.readCsv("trips.txt", func(s []string) {
-		trip_id := s[2]
 		route_id := s[0]
+		service := s[1]
+		trip_id := s[2]
+		direction := s[4]
 		shape_id := s[6]
 
 		var shape *Shape
@@ -145,7 +149,7 @@ func Load(feed_path string, loadStopTimes bool) Feed {
 		f.Trips[trip_id] = &trip
 
 		route := f.Routes[route_id]
-		trip = Trip{Shape: shape, Route: route, Id: trip_id}
+		trip = Trip{Shape: shape, Route: route, Id: trip_id, Direction: direction, Service: service}
 		route.Trips = append(route.Trips, &trip)
 		f.Routes[route_id] = route
 	})

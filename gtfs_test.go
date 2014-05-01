@@ -34,6 +34,15 @@ func TestTrips(t *testing.T) {
 	if res != 23 {
 		t.Errorf("Route should have all trips, got %d", res)
 	}
+
+	firstTrip := feed.RouteByShortName("N").Trips[0]
+	if firstTrip.Service != "1" {
+		t.Errorf("trip should have Service")
+	}
+
+	if firstTrip.Direction != "1" {
+		t.Errorf("trip should have Direction")
+	}
 }
 
 func TestStopTimes(t *testing.T) {
