@@ -20,6 +20,11 @@ func TestLoadRoutes(t *testing.T) {
 	if res != "N" {
 		t.Errorf("Feed should be addressable by Route short name, got %s", res)
 	}
+
+	res = feed.RouteByShortName("N").LongName
+	if res != "JUDAH" {
+		t.Errorf("Feed should be have long name, got %s", res)
+	}
 }
 
 func TestTrips(t *testing.T) {

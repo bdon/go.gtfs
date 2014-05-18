@@ -21,6 +21,7 @@ type Feed struct {
 type Route struct {
 	Id        string
 	ShortName string
+	LongName  string
 	Trips     []*Trip
 }
 
@@ -131,8 +132,9 @@ func Load(feed_path string, loadStopTimes bool) Feed {
 
 	f.readCsv("routes.txt", func(s []string) {
 		rsn := strings.TrimSpace(s[2])
+		rln := strings.TrimSpace(s[3])
 		id := strings.TrimSpace(s[0])
-		f.Routes[id] = &Route{Id: id, ShortName: rsn}
+		f.Routes[id] = &Route{Id: id, ShortName: rsn, LongName: rln}
 	})
 
 	f.readCsv("trips.txt", func(s []string) {
