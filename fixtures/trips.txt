@@ -7,6 +7,7 @@ route_id,service_id,trip_id,trip_headsign,direction_id,block_id,shape_id
 1093,1,6041334,Caltrain via Downtown,1,9718,116466
 1093,1,6041333,Caltrain via Downtown,1,9705,116466
 1093,1,6041331,Caltrain via Downtown,1,9716,116466
+1093,1,6041331,HeadSignIDunCare,1,9716,116467
 1093,3,6042020,Ocean Beach ,0,9711,116451
 1093,3,6041923,Ocean Beach ,0,9707,116451
 1093,3,6041922,Ocean Beach ,0,9705,116451

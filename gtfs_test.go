@@ -36,7 +36,7 @@ func TestTrips(t *testing.T) {
 	}
 
 	res = len(feed.RouteByShortName("N").Trips)
-	if res != 23 {
+	if res != 24 {
 		t.Errorf("Route should have all trips, got %d", res)
 	}
 
@@ -47,6 +47,10 @@ func TestTrips(t *testing.T) {
 
 	if firstTrip.Direction != "1" {
 		t.Errorf("trip should have Direction")
+	}
+
+	if firstTrip.Headsign != "Caltrain via Downtown" {
+		t.Errorf("Trip should have headsign")
 	}
 }
 
@@ -74,13 +78,13 @@ func TestStopTimes(t *testing.T) {
 func TestShapes(t *testing.T) {
 	feed := Load("./fixtures", true)
 	res := len(feed.Shapes)
-	if res != 3 {
-		t.Errorf("Feed should have three total shapes")
+	if res != 4 {
+		t.Errorf("Feed should have four total shapes")
 	}
 
 	res = len(feed.RouteByShortName("N").Shapes())
-	if res != 2 {
-		t.Errorf("Route should have two total shapes")
+	if res != 3 {
+		t.Errorf("Route should have three total shapes")
 	}
 
 	coord := feed.Shapes["116466"].Coords[0]
@@ -134,5 +138,19 @@ func TestStops(t *testing.T) {
 	res := len(feed.Stops)
 	if res != 4 {
 		t.Errorf("Feed should have four total stops")
+	}
+}
+
+func TestTripHeadsigns(t *testing.T) {
+	feed := Load("./fixtures", false)
+	res := feed.RouteByShortName("N").Headsigns()
+	if len(res) != 2 {
+		t.Errorf("Route should have two headsigns")
+	}
+	if res[0] != "Ocean Beach" {
+		t.Errorf("Expected Ocean Beach, got %s", res[0])
+	}
+	if res[1] != "Caltrain via Downtown" {
+		t.Errorf("Expected Caltrain via Downtown, got %s", res[1])
 	}
 }

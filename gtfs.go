@@ -31,9 +31,15 @@ type Trip struct {
 	Route     *Route
 	Service   string
 	Direction string
+	Headsign  string
 
 	// may not be loaded
 	StopTimes []StopTime
+}
+
+type Headsign struct {
+	Direction string
+	Text      string
 }
 
 type Shape struct {
@@ -143,6 +149,7 @@ func Load(feed_path string, loadStopTimes bool) Feed {
 		trip_id := s[2]
 		direction := s[4]
 		shape_id := s[6]
+		headsign := s[3]
 
 		var shape *Shape
 		shape = f.Shapes[shape_id]
@@ -151,7 +158,7 @@ func Load(feed_path string, loadStopTimes bool) Feed {
 		f.Trips[trip_id] = &trip
 
 		route := f.Routes[route_id]
-		trip = Trip{Shape: shape, Route: route, Id: trip_id, Direction: direction, Service: service}
+		trip = Trip{Shape: shape, Route: route, Id: trip_id, Direction: direction, Service: service, Headsign: headsign}
 		route.Trips = append(route.Trips, &trip)
 		f.Routes[route_id] = route
 	})
@@ -250,4 +257,27 @@ func (route Route) Stops() []*Stop {
 		retval = append(retval, k)
 	}
 	return retval
+}
+
+func (route Route) Headsigns() []string {
+	max0 := 0
+	maxHeadsign0 := ""
+	max1 := 1
+	maxHeadsign1 := ""
+
+	for _, t := range route.Trips {
+		if t.Direction == "0" {
+			if len(t.Shape.Coords) > max0 {
+				max0 = len(t.Shape.Coords)
+				maxHeadsign0 = strings.TrimSpace(t.Headsign)
+			}
+		} else { // direction == 1. only bidirectional
+			if len(t.Shape.Coords) > max1 {
+				max1 = len(t.Shape.Coords)
+				maxHeadsign1 = strings.TrimSpace(t.Headsign)
+			}
+		}
+	}
+
+	return []string{maxHeadsign0, maxHeadsign1}
 }
