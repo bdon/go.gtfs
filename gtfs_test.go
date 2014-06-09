@@ -157,26 +157,26 @@ func TestTripHeadsigns(t *testing.T) {
 
 func TestCalendar(t *testing.T) {
 	feed := Load("./fixtures", false)
-	schedule := feed.Schedule()
-	if schedule[0] != "1" {
+	calendar := feed.Calendar()
+	if calendar[0] != "1" {
 		t.Errorf("Monday should be 1")
 	}
-	if schedule[1] != "1" {
+	if calendar[1] != "1" {
 		t.Errorf("Tuesday should be 1")
 	}
-	if schedule[2] != "1" {
+	if calendar[2] != "1" {
 		t.Errorf("Wednesday should be 1")
 	}
-	if schedule[3] != "1" {
+	if calendar[3] != "1" {
 		t.Errorf("Thursday should be 1")
 	}
-	if schedule[4] != "1" {
+	if calendar[4] != "1" {
 		t.Errorf("Friday should be 1")
 	}
-	if schedule[5] != "2" {
+	if calendar[5] != "2" {
 		t.Errorf("Saturday should be 2")
 	}
-	if schedule[6] != "3" {
+	if calendar[6] != "3" {
 		t.Errorf("Sunday should be 3")
 	}
 }

@@ -294,7 +294,7 @@ func (route Route) Headsigns() []string {
 	return []string{maxHeadsign0, maxHeadsign1}
 }
 
-func (feed Feed) Schedule() []string {
+func (feed Feed) Calendar() []string {
 	retval := []string{}
 	for i := 0; i <= 6; i++ {
 		for k, v := range feed.CalendarEntries {
