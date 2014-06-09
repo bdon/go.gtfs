@@ -11,11 +11,12 @@ import (
 )
 
 type Feed struct {
-	Dir    string
-	Routes map[string]*Route
-	Shapes map[string]*Shape
-	Stops  map[string]*Stop
-	Trips  map[string]*Trip
+	Dir             string
+	Routes          map[string]*Route
+	Shapes          map[string]*Shape
+	Stops           map[string]*Stop
+	Trips           map[string]*Trip
+	CalendarEntries map[string]CalendarEntry
 }
 
 type Route struct {
@@ -58,6 +59,11 @@ type StopTime struct {
 	Trip *Trip
 	Time int
 	Seq  int
+}
+
+type CalendarEntry struct {
+	ServiceId string
+	Days      []string
 }
 
 type StopTimeBySeq []StopTime
@@ -108,6 +114,12 @@ func Load(feed_path string, loadStopTimes bool) Feed {
 	f.Shapes = make(map[string]*Shape)
 	f.Stops = make(map[string]*Stop)
 	f.Trips = make(map[string]*Trip)
+	f.CalendarEntries = make(map[string]CalendarEntry)
+
+	f.readCsv("calendar.txt", func(s []string) {
+		c := CalendarEntry{ServiceId: s[0], Days: s[1:8]}
+		f.CalendarEntries[s[0]] = c
+	})
 
 	// we assume that this CSV is grouped by shape_id
 	// but this is not guaranteed in spec?
@@ -280,4 +292,16 @@ func (route Route) Headsigns() []string {
 	}
 
 	return []string{maxHeadsign0, maxHeadsign1}
+}
+
+func (feed Feed) Schedule() []string {
+	retval := []string{}
+	for i := 0; i <= 6; i++ {
+		for k, v := range feed.CalendarEntries {
+			if v.Days[i] == "1" {
+				retval = append(retval, k)
+			}
+		}
+	}
+	return retval
 }
